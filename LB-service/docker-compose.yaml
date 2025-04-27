@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  lb-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lb-service
+    ports:
+      - "8080:8080"
+    volumes:
+      - ${CONFIG_PATH:-./config/config.json}:/config/config.json:ro
+    command: ["/build", "-config", "/config/config.json"]

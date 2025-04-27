@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  lb-service:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    container_name: lb-service-test
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../${CONFIG_PATH:-./config/config.json}:/config/config.json:ro
+    command: ["/build", "-config", "/config/config.json"]
+    
+    networks:
+        - internal
+
+
+  server1:
+    build: .
+    container_name: server1
+    environment:
+      - SERVER_NUMBER=1
+    networks:
+        - internal
+
+ 
+  server2:
+    build: .
+    container_name: server2
+    environment:
+    - SERVER_NUMBER=2
+    networks:
+        - internal
+
+
+  server3:
+    build: .
+    container_name: server3
+    environment:
+      - SERVER_NUMBER=3
+    networks:
+        - internal
+
+networks:
+  internal:

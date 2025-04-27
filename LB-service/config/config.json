@@ -1,0 +1,9 @@
+{
+    "port": "8080",
+    "list_of_srvs": [
+      "http://server1:8088",
+      "http://server2:8088",
+      "http://server3:8088"
+    ]
+  }
+  
