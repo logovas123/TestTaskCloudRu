@@ -13,6 +13,9 @@ type TokenBucket struct {
 	mutex         sync.Mutex
 }
 
+// метод создаёт новый бакет
+// MaxTokens - это размер бакета
+// Rate - скорость добавления токенов, показывает колиство раз добавления в секунду
 func NewTokenBucket(MaxTokens uint64, Rate uint64) *TokenBucket {
 	everyMs := 1 / float64(Rate) * 1000
 

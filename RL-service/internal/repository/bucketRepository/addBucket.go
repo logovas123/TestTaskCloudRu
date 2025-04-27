@@ -12,6 +12,8 @@ type AddBucketRequest struct {
 	Bucket *bucket.TokenBucket
 }
 
+// метод добавляет бакет в мапу
+// мапа требуется для хранения запущенных бакетов, ключ - это ip клиента
 func (r *BucketRepository) AddBucket(
 	ctx context.Context,
 	req AddBucketRequest,

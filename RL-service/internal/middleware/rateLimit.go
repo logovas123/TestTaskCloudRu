@@ -1,6 +1,9 @@
 package middleware
 
 import (
+	"errors"
+	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -34,34 +37,54 @@ type RateLimitResponse struct {
 
 func (m *MDWManager) RateLimit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		count := r.Header.Get("count")
+		count := r.URL.Query().Get("count")
 		if count == "" {
 			count = os.Getenv("DEFAULT_COUNT")
 		}
 
-		rate := r.Header.Get("rate")
+		rate := r.URL.Query().Get("rate")
 		if rate == "" {
 			rate = os.Getenv("DEFAULT_RATE")
 		}
 
 		host, _, err := net.SplitHostPort(r.RemoteAddr)
 		if err != nil {
+			slog.Error("error parse remote addr", "error", err, "remoteAddr", r.RemoteAddr)
 			http.Error(w, errlst.ErrMsgInternalError, http.StatusInternalServerError)
 			return
 		}
 		ip := host
 
+		// переходим в usecase
 		err = m.limiterUC.RateLimit(r.Context(), toRateLimitRequest(RateLimitRequest{
 			IP:    ip,
 			Count: count,
 			Rate:  rate,
 		}))
 		if err != nil {
-			http.Error(w, errlst.ErrMsgInternalError, http.StatusInternalServerError)
+			switch {
+			case errors.Is(err, errlst.ErrBucketExist):
+				http.Error(w, fmt.Sprintf("\"error\": %s; \"ip\": %s", errlst.ErrMsgBucketExist, ip),
+					http.StatusInternalServerError,
+				)
+
+			case errors.Is(err, errlst.ErrBucketNotExist):
+				http.Error(w, fmt.Sprintf("\"error\": %s; \"ip\": %s", errlst.ErrMsgBucketNotExist, ip),
+					http.StatusNotFound,
+				)
+
+			default:
+				http.Error(w, fmt.Sprintf("\"error\": %s; \"ip\": %s", errlst.ErrMsgInternalError, ip),
+					http.StatusInternalServerError,
+				)
+			}
+			slog.Error("error rate limiter", "error", err, "IP", ip)
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		slog.Info("request redirect", "IP", ip)
+
+		next.ServeHTTP(w, r) // запрос идёт дальше
 	})
 }
 

@@ -5,6 +5,7 @@ import (
 	"log/slog"
 )
 
+// в отдельной горутине каждый тик будет добавляться токен в бакет
 func (tb *TokenBucket) Start(ctx context.Context) {
 	go func() {
 		for {

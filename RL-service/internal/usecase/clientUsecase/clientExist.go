@@ -22,18 +22,19 @@ type CreateClientIfNotExistResponse struct {
 	IsExist bool
 }
 
+// метод для создания клиента
 func (u *ClientUC) CreateClientIfNotExist(
 	ctx context.Context,
 	req CreateClientIfNotExistRequest,
 ) (CreateClientIfNotExistResponse, error) {
 	reqNew, err := toCreateClientIfNotExistRequest(req)
 	if err != nil {
-		slog.Error("error convert request", "error", err)
+		slog.Error("error convert request", "ip", req.IP, "error", err)
 		return CreateClientIfNotExistResponse{}, fmt.Errorf("error convert request: %w", err)
 	}
 	client, err := u.clientRepo.CreateClientIfNotExist(ctx, reqNew)
 	if err != nil {
-		slog.Error("error creating client", "error", err)
+		slog.Error("error create client", "ip", req.IP, "error", err)
 		return CreateClientIfNotExistResponse{}, fmt.Errorf("error creating client: %w", err)
 	}
 
@@ -44,12 +45,12 @@ func toCreateClientIfNotExistRequest(req CreateClientIfNotExistRequest) (
 	clientRepository.CreateClientIfNotExistRequest,
 	error,
 ) {
-	count, err := strconv.Atoi(req.Count)
+	count, err := strconv.ParseUint(req.Count, 10, 64)
 	if err != nil {
 		return clientRepository.CreateClientIfNotExistRequest{}, fmt.Errorf("invalid count: %w", err)
 	}
 
-	rate, err := strconv.Atoi(req.Rate)
+	rate, err := strconv.ParseUint(req.Rate, 10, 64)
 	if err != nil {
 		return clientRepository.CreateClientIfNotExistRequest{}, fmt.Errorf("invalid rate: %w", err)
 	}

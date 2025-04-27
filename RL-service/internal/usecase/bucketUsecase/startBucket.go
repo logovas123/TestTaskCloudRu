@@ -2,6 +2,7 @@ package bucketUsecase
 
 import (
 	"context"
+	"log/slog"
 
 	"rl-service/internal/repository/bucketRepository"
 	"rl-service/pkg/bucket"
@@ -13,18 +14,22 @@ type StartBucketRequest struct {
 	MaxTokens uint64
 }
 
+// в методе создаётся бакет, далее бакет добавляется в мапу и стартуется
 func (u *BucketUC) StartBucket(
 	ctx context.Context,
 	req StartBucketRequest,
 ) error {
-	bucket := bucket.NewTokenBucket(req.MaxTokens, req.Rate)
+	bkt := bucket.NewTokenBucket(req.MaxTokens, req.Rate)
 
-	err := u.bucketRepo.AddBucket(ctx, toAddBucketRequest(req, bucket))
+	err := u.bucketRepo.AddBucket(ctx, toAddBucketRequest(req, bkt))
 	if err != nil {
+		slog.Error("error add bucket to map", "ip", req.IP, "error", err)
 		return err
 	}
 
-	bucket.Start(ctx)
+	bkt.Start(ctx)
+
+	slog.Info("bucket start success")
 
 	return nil
 }

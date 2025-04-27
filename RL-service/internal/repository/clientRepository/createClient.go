@@ -22,6 +22,8 @@ type CreateClientIfNotExistResponse struct {
 	IsExist bool
 }
 
+// метод создаёт транзакцию и делает два запроса в базу: один для проверки существоения клиента,
+// второй запрос для добавления клиента в базу, если он не существует
 func (r *ClientRepository) CreateClientIfNotExist(
 	ctx context.Context,
 	req CreateClientIfNotExistRequest,
@@ -59,12 +61,14 @@ func (r *ClientRepository) CreateClientIfNotExist(
 				slog.Error("error creating client in db", "error", err)
 				return CreateClientIfNotExistResponse{}, err
 			}
+			slog.Info("client create success", "ip", req.IP)
 			return client, nil
 		}
 		slog.Error("error executing query to db", "error", err)
 		return CreateClientIfNotExistResponse{}, err
 	}
 
+	slog.Info("client exist", "ip", req.IP)
 	client.IsExist = true
 
 	return client, nil
@@ -85,7 +89,7 @@ func insertClient(
 		Scan(&client.IP, &client.Count, &client.Rate)
 	if err != nil {
 		slog.Error("error inserting client to db", "error", err)
-		return CreateClientIfNotExistResponse{}, fmt.Errorf("error add pvz in db: %w", err)
+		return CreateClientIfNotExistResponse{}, err
 	}
 
 	return client, nil

@@ -15,6 +15,7 @@ type GetBucketResponse struct {
 	Bucket *bucket.TokenBucket
 }
 
+// метод получает бакет по ip
 func (r *BucketRepository) GetBucket(
 	ctx context.Context,
 	req GetBucketRequest,
@@ -27,7 +28,5 @@ func (r *BucketRepository) GetBucket(
 		return GetBucketResponse{}, errlst.ErrBucketNotExist
 	}
 
-	return GetBucketResponse{
-		Bucket: b,
-	}, nil
+	return GetBucketResponse{Bucket: b}, nil
 }
