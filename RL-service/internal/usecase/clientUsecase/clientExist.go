@@ -2,6 +2,8 @@ package clientUsecase
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -35,6 +37,13 @@ func (u *ClientUC) CreateClientIfNotExist(
 	}
 	client, err := u.clientRepo.CreateClientIfNotExist(ctx, reqNew)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			client, err = u.clientRepo.CreateClientIfNotExist(ctx, reqNew)
+			if err != nil {
+				return CreateClientIfNotExistResponse{}, fmt.Errorf("error creating client: %w", err)
+			}
+			return toCreateClientIfNotExistResponse(client), nil
+		}
 		return CreateClientIfNotExistResponse{}, fmt.Errorf("error creating client: %w", err)
 	}
 

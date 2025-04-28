@@ -73,6 +73,8 @@ func (r *ClientRepository) CreateClientIfNotExist(
 	return client, nil
 }
 
+// если два запроса пытаются вставить данные по одному ip,
+// то это обрабатывается через ON CONFLICT, и потом отлавливается в usecase ошибка ErrNoRows
 func insertClient(
 	ctx context.Context,
 	tx pgx.Tx,
@@ -81,6 +83,7 @@ func insertClient(
 	query := `
 		INSERT INTO clients (ip, count, rate)
 		VALUES ($1, $2, $3)
+		ON CONFLICT (ip) DO NOTHING
 		RETURNING ip::TEXT, count, rate
 	`
 	var client CreateClientIfNotExistResponse
