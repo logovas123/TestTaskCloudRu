@@ -18,7 +18,7 @@ func (tb *TokenBucket) Start(ctx context.Context) {
 				tb.mutex.Unlock()
 			case <-ctx.Done():
 				tb.ticker.Stop()
-				slog.Info("context canceled")
+				slog.Info(ctx.Err().Error())
 				return
 			}
 		}

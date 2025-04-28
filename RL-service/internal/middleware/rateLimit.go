@@ -73,6 +73,11 @@ func (m *MDWManager) RateLimit(next http.Handler) http.Handler {
 					http.StatusNotFound,
 				)
 
+			case errors.Is(err, errlst.ErrCountOrRateNoValid):
+				http.Error(w, fmt.Sprintf("\"error\": %s; \"ip\": %s", errlst.ErrMsgCountOrRateNoValid, ip),
+					http.StatusBadRequest,
+				)
+
 			default:
 				http.Error(w, fmt.Sprintf("\"error\": %s; \"ip\": %s", errlst.ErrMsgInternalError, ip),
 					http.StatusInternalServerError,

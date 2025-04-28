@@ -29,7 +29,7 @@ func (r *ClientRepository) CreateClientIfNotExist(
 	req CreateClientIfNotExistRequest,
 ) (CreateClientIfNotExistResponse, error) {
 	query := `
-        SELECT ip, count, rate FROM clients 
+        SELECT ip::TEXT, count, rate FROM clients 
         WHERE ip = $1
     `
 
@@ -58,7 +58,7 @@ func (r *ClientRepository) CreateClientIfNotExist(
 		if errors.Is(err, pgx.ErrNoRows) {
 			client, err = insertClient(ctx, tx, req)
 			if err != nil {
-				slog.Error("error creating client in db", "error", err)
+				slog.Error("error inserting client in db", "error", err)
 				return CreateClientIfNotExistResponse{}, err
 			}
 			slog.Info("client create success", "ip", req.IP)
@@ -68,7 +68,6 @@ func (r *ClientRepository) CreateClientIfNotExist(
 		return CreateClientIfNotExistResponse{}, err
 	}
 
-	slog.Info("client exist", "ip", req.IP)
 	client.IsExist = true
 
 	return client, nil
@@ -82,13 +81,12 @@ func insertClient(
 	query := `
 		INSERT INTO clients (ip, count, rate)
 		VALUES ($1, $2, $3)
-		RETURNING ip, count, rate
+		RETURNING ip::TEXT, count, rate
 	`
 	var client CreateClientIfNotExistResponse
 	err := tx.QueryRow(ctx, query, req.IP, req.Count, req.Rate).
 		Scan(&client.IP, &client.Count, &client.Rate)
 	if err != nil {
-		slog.Error("error inserting client to db", "error", err)
 		return CreateClientIfNotExistResponse{}, err
 	}
 

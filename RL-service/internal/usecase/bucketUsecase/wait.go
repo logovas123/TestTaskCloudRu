@@ -25,7 +25,6 @@ func (u *BucketUC) Wait(
 	if err := resp.Bucket.Wait(ctx); err != nil {
 		slog.Error("error remove token", "ip", req.IP, "error", err)
 	}
-	slog.Info("token success removed")
 
 	return nil
 }

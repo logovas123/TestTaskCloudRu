@@ -29,7 +29,6 @@ func (u *LimiterUC) RateLimit(
 ) error {
 	client, err := u.clientUC.CreateClientIfNotExist(ctx, toCreateClientIfNotExistRequest(req))
 	if err != nil {
-		slog.Error("error create client", "ip", req.IP, "error", err)
 		return err
 	}
 

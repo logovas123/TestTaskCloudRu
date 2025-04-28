@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS clients;
+
+CREATE TABLE IF NOT EXISTS clients (
+    ip INET PRIMARY KEY,
+    count INT NOT NULL,
+    rate INT NOT NULL
+);

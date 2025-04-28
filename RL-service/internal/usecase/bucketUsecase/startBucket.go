@@ -27,7 +27,7 @@ func (u *BucketUC) StartBucket(
 		return err
 	}
 
-	bkt.Start(ctx)
+	bkt.Start(context.Background())
 
 	slog.Info("bucket start success")
 

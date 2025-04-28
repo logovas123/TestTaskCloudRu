@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"rl-service/internal/repository/clientRepository"
+	"rl-service/pkg/errlst"
 )
 
 type CreateClientIfNotExistRequest struct {
@@ -34,7 +35,6 @@ func (u *ClientUC) CreateClientIfNotExist(
 	}
 	client, err := u.clientRepo.CreateClientIfNotExist(ctx, reqNew)
 	if err != nil {
-		slog.Error("error create client", "ip", req.IP, "error", err)
 		return CreateClientIfNotExistResponse{}, fmt.Errorf("error creating client: %w", err)
 	}
 
@@ -49,10 +49,18 @@ func toCreateClientIfNotExistRequest(req CreateClientIfNotExistRequest) (
 	if err != nil {
 		return clientRepository.CreateClientIfNotExistRequest{}, fmt.Errorf("invalid count: %w", err)
 	}
+	if count == 0 {
+		return clientRepository.CreateClientIfNotExistRequest{},
+			errlst.ErrCountOrRateNoValid
+	}
 
 	rate, err := strconv.ParseUint(req.Rate, 10, 64)
 	if err != nil {
 		return clientRepository.CreateClientIfNotExistRequest{}, fmt.Errorf("invalid rate: %w", err)
+	}
+	if rate == 0 {
+		return clientRepository.CreateClientIfNotExistRequest{},
+			errlst.ErrCountOrRateNoValid
 	}
 
 	return clientRepository.CreateClientIfNotExistRequest{
