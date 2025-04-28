@@ -87,7 +87,7 @@ func (m *MDWManager) RateLimit(next http.Handler) http.Handler {
 			return
 		}
 
-		slog.Info("request redirect", "IP", ip)
+		slog.Info("request redirect success", "IP", ip)
 
 		next.ServeHTTP(w, r) // запрос идёт дальше
 	})
