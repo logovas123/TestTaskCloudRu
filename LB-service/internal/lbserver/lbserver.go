@@ -70,7 +70,7 @@ func (s *Server) Run() error {
 	defer cancel()
 
 	go func() {
-		t := time.NewTicker(30 * time.Second)
+		t := time.NewTicker(30 * time.Second) // каждые 30 сек проверка на жизнь
 		defer t.Stop()
 
 		for {
