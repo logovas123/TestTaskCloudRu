@@ -29,8 +29,6 @@ func (u *BucketUC) StartBucket(
 
 	bkt.Start(context.Background())
 
-	slog.Info("bucket start success")
-
 	return nil
 }
 

@@ -1,6 +1,8 @@
 package server
 
 import (
+	"log/slog"
+
 	"rl-service/internal/handler/clientHandlers"
 	"rl-service/internal/middleware"
 	"rl-service/internal/repository/bucketRepository"
@@ -11,13 +13,18 @@ import (
 )
 
 // в методе создаются слои, и регистрируются обработчики
-func (s *Server) MapHandlers() {
+func (s *Server) MapHandlers() error {
 	clientRepo := clientRepository.NewClientRepository(s.pool)
 	clientUC := clientUsecase.NewClientUC(s.cfg, clientRepo)
 	clientHandler := clientHandlers.NewClientHandlers()
 
 	bucketRepo := bucketRepository.NewBucketRepository()
 	bucketUC := bucketUsecase.NewBucketUC(s.cfg, bucketRepo)
+	err := s.RecoverBuckets(bucketUC)
+	if err != nil {
+		slog.Error("error recover buckets", "error", err)
+		return err
+	}
 
 	limiterUC := limiterUsecase.NewLimiterUC(s.cfg, clientUC, bucketUC)
 
@@ -26,4 +33,6 @@ func (s *Server) MapHandlers() {
 	mux := clientHandlers.MapClientHandlers(clientHandler, mw)
 
 	s.srv.Handler = mux
+
+	return nil
 }

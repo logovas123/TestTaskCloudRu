@@ -30,6 +30,7 @@ func main() {
 
 	s := server.NewServer(cfg, pool)
 	slog.Info("server create success")
+
 	if err := s.Run(); err != nil {
 		slog.Error("can't start server", "error", err)
 		os.Exit(1)
